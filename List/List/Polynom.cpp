@@ -105,7 +105,6 @@ Polynom Polynom::operator-(const Polynom& right)
 			temp2.setCoeff(-temp2.getCoeff());
 			temp.addMonom(temp2);
 		}
-	//delete[] isRightMonomUsed;
 	return temp;
 }
 
@@ -117,7 +116,48 @@ Polynom Polynom::operator*(const Polynom& right)
 	for (int i = 0; i < this->size; i++)
 		for (int j = 0; j < right.size; j++)
 			temp.addMonom(this->returnMonom(i) * right.returnMonom(j));
-	return temp;
+	
+	Polynom tmp;
+	for (int i = 0; i < temp.getSize(); i++) {
+		double k = temp.returnMonom(i).getCoeff();
+		for (int j = i + 1; j < temp.getSize(); j++) {
+			if (temp.returnMonom(i).getPower() == temp.returnMonom(j).getPower()) {
+				k += temp.returnMonom(j).getCoeff();
+			}
+		}
+		Monom p(k, temp.returnMonom(i).getPower());
+		tmp.addMonom(p);
+		//if (tmp.getSize() == 0) {
+		//	tmp.addMonom(p);
+		//}
+		//else {
+		//	int flag = 0;
+		//	for (int h = 0; h < tmp.getSize(); h++) {
+		//		if (temp.returnMonom(i).getPower() == tmp.returnMonom(h).getPower()) {
+		//			flag = 1;
+		//		}
+		//	}
+		//	if (flag == 0) {
+		//		tmp.addMonom(p);
+		//	}
+		//}
+	}
+
+	Polynom trmp;
+	trmp.addMonom(tmp.returnMonom(0));
+	for (int i = 1; i < tmp.getSize(); i++) {
+		int flag = 0;
+		for (int j = 0; j < trmp.getSize(); j++) {
+			if (tmp.returnMonom(i).getPower() == trmp.returnMonom(j).getPower()) {
+				flag = 1;
+			}
+		}
+		if (flag == 0) {
+			trmp.addMonom(tmp.returnMonom(i));
+		}
+	}
+
+	return trmp;
 }
 
 double Polynom::calculate(int x)
@@ -180,12 +220,20 @@ std::istream& operator>>(std::istream& in, Polynom& obj)
 
 std::ostream& operator<<(std::ostream& out, const Polynom& obj)
 {
+	int flag = 0;
 	for (int i = 0; i < obj.size; i++)
 	{
-		out << obj.data.getElement(i).getCoeff() << "*x^"
-			<< obj.data.getElement(i).getPower();
-		if (i != obj.size - 1 && obj.data.getElement(i + 1).getCoeff() >= 0)
-			out << "+";
+		if (obj.data.getElement(i).getCoeff() != 0) {
+			out << obj.data.getElement(i).getCoeff() << "*x^"
+				<< obj.data.getElement(i).getPower();
+			flag = 1;
+
+			if (i != obj.size - 1 && obj.data.getElement(i + 1).getCoeff() >= 0)
+				out << "+";
+		}
+	}
+	if (flag == 0) {
+		out << "0";
 	}
 	return out;
 }
